@@ -1,0 +1,3 @@
+[submodule "visualstudio-wakatime"]
+	path = visualstudio-wakatime
+	url = https://github.com/wakatime/visualstudio-wakatime.git
