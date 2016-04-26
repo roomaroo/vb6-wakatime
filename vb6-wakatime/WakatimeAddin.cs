@@ -3,10 +3,15 @@ namespace vb6_wakatime
 {
     using System;
     using System.Diagnostics;
+    using System.Net;
     using System.Reactive.Linq;
     using System.Runtime.CompilerServices;
     using System.Runtime.InteropServices;
+    using System.Threading.Tasks;
+    using System.Windows;
+    using Settings;
     using VBIDE;
+    using WakaTime;
 
     [ComVisible(true)]
     [Guid("8AEAE01D-49CD-429A-B71C-1818821A051A")]
@@ -19,6 +24,19 @@ namespace vb6_wakatime
         private VBComponentsEvents componentEvents;
         private IDisposable observableTimer;
         private string currentFileContents;
+
+        private readonly Wakatime wakatime;
+        private readonly WakaTimeConfigFile configFile;
+
+        public WakatimeAddin() : this(new Wakatime(), new WakaTimeConfigFile())
+        {
+        }
+
+        public WakatimeAddin(Wakatime wakatime, WakaTimeConfigFile configFile)
+        {
+            this.wakatime = wakatime;
+            this.configFile = configFile;
+        }
 
         public void OnConnection(object vbInstance, vbext_ConnectMode ConnectMode, AddIn addinInstance, ref Array custom)
         {
@@ -62,6 +80,41 @@ namespace vb6_wakatime
         }
         public void OnStartupComplete(ref Array custom)
         {
+            this.GetDependenciesAndSettingsAsync().Start();
+        }
+
+        private async Task GetDependenciesAndSettingsAsync()
+        {
+            try
+            {
+                await this.wakatime.DownloadDependenciesAsync().ConfigureAwait(true);
+            }
+            catch (WebException we)
+            {
+                this.ShowError("Could not download dependencies. Please ensure you have an internet connection and your proxy details are entered correctly");
+            }
+            catch (Exception ex)
+            {
+                this.ShowError($"Unexpected exception: {ex.Message} ({ex.GetType().Name})");
+            }
+
+            this.PromptForMissingSettings();
+        }
+
+        private void PromptForMissingSettings()
+        {
+            this.configFile.Read();
+
+            if (string.IsNullOrEmpty(this.configFile.ApiKey))
+            {
+                var settingsWindow = new SettingsView(new SettingsViewModel(this.configFile));
+                settingsWindow.ShowDialog();
+            }
+        }
+
+        private void ShowError(string message)
+        {
+            MessageBox.Show(message, "WakaTime", MessageBoxButton.OK, MessageBoxImage.Exclamation);
         }
 
         void HookupEvents()
