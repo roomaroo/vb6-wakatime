@@ -1,40 +1,53 @@
 ﻿using System;
 using System.Net;
 using System.Threading.Tasks;
+using log4net;
 using WakaTime;
 
 namespace vb6_wakatime
 {
-    public class Wakatime
+    internal class Wakatime
     {
+        ILog log = LogManager.GetLogger(nameof(Wakatime));
+        private readonly WakaTimeCli wakatimeCli;
+        private readonly PythonManager pythonManager;
+        
+        internal Wakatime(PythonManager pythonManager, WakaTimeCli wakatimeCli)
+        {
+            this.pythonManager = pythonManager;
+            this.wakatimeCli = wakatimeCli;
+        }
+
         public Task DownloadDependenciesAsync()
         {
             return Task.Run(() => DownloadDependencies());
         }
 
-        public void DownloadDependencies()
+        public async Task DownloadDependencies()
         {
             try
             {
+                var downloader = new Downloader();
+
                 // Make sure python is installed
-                if (!PythonManager.IsPythonInstalled())
+                if (!this.pythonManager.IsPythonInstalled())
                 {
-                    Downloader.DownloadAndInstallPython();
+                    await downloader.DownloadAndInstallPythonAsync();
                 }
 
-                if (!WakaTimeCli.DoesCliExist() || !WakaTimeCli.IsCliLatestVersion())
+                if (!this.wakatimeCli.DoesCliExist() || ! await this.wakatimeCli.IsCliLatestVersion())
                 {
-                    Downloader.DownloadAndInstallCli();
+                    await downloader.DownloadAndInstallWakaTimeAsync();
                 }
             }
             catch (WebException ex)
             {
-                Logger.Error("Are you behind a proxy? Try setting a proxy in WakaTime Settings with format https://user:pass@host:port. Exception Traceback:", ex);
+                log.Error("Are you behind a proxy? Try setting a proxy in WakaTime Settings with format https://user:pass@host:port. Exception Traceback:", ex);
                 throw;
             }
             catch (Exception ex)
             {
-                Logger.Error("Error detecting dependencies. Exception Traceback:", ex);
+                log.Error("Error detecting dependencies. Exception Traceback:", ex);
                 throw;
             }
         }

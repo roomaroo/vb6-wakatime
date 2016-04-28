@@ -1,0 +1,21 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="vb6_wakatime.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="ApiKey" Type="System.Guid" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="Proxy" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="CliUri" Type="System.Uri" Scope="User">
+      <Value Profile="(Default)">https://github.com/wakatime/wakatime/archive/master.zip</Value>
+    </Setting>
+    <Setting Name="CliFolder" Type="System.String" Scope="User">
+      <Value Profile="(Default)">wakatime-master\wakatime\cli.py</Value>
+    </Setting>
+    <Setting Name="WakaTimeUri" Type="System.Uri" Scope="User">
+      <Value Profile="(Default)">https://raw.githubusercontent.com/wakatime/wakatime/master/wakatime/__about__.py</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

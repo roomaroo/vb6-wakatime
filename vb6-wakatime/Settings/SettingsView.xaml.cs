@@ -5,11 +5,15 @@ namespace vb6_wakatime.Settings
     /// <summary>
     /// Interaction logic for SettingsView.xaml
     /// </summary>
-    public partial class SettingsView : Window
+    partial class SettingsView : Window
     {
         private readonly SettingsViewModel viewModel;
 
-        public SettingsView(SettingsViewModel viewModel)
+        internal SettingsView() : this(new SettingsViewModel())
+        {
+        }
+        
+        internal SettingsView(SettingsViewModel viewModel)
         {
             this.viewModel = viewModel;
             this.DataContext = viewModel;

@@ -1,58 +1,47 @@
-﻿using System;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using WakaTime;
-
-namespace vb6_wakatime.Settings
+﻿namespace vb6_wakatime.Settings
 {
-    public class SettingsViewModel : INotifyPropertyChanged
+    using System;
+    using System.ComponentModel;
+    using System.Runtime.CompilerServices;
+
+    internal class SettingsViewModel : INotifyPropertyChanged
     {
-        private readonly WakaTimeConfigFile configFile;
-
-        public SettingsViewModel(WakaTimeConfigFile configFile)
-        {
-            this.configFile = configFile;
-            this.configFile.Read();
-        }
-
-        public string ApiKey
+        internal Guid ApiKey
         {
             get
             {
-                return this.configFile.ApiKey;
+                return Properties.Settings.Default.ApiKey;
             }
 
             set
             {
-                Guid apiGuid;
-                if (Guid.TryParse(value, out apiGuid))
+                if (Properties.Settings.Default.ApiKey != value)
                 {
-                    this.configFile.ApiKey = value;
+                    Properties.Settings.Default.ApiKey = value;
                     this.NotifyPropertyChanged();
-                }
-                else
-                {
-                    throw new FormatException("The API key is in the wrong format");
                 }
             }
         }
 
         public void Save()
         {
-            this.configFile.Save();
+            Properties.Settings.Default.Save();
         }
 
         public string Proxy
         {
             get
             {
-                return this.configFile.ApiKey;
+                return Properties.Settings.Default.Proxy;
             }
 
             set
             {
-                this.configFile.Proxy = value;
-                this.NotifyPropertyChanged();
+                if (Properties.Settings.Default.Proxy != value)
+                {
+                    Properties.Settings.Default.Proxy = value;
+                    this.NotifyPropertyChanged();
+                }
             }
         }
 

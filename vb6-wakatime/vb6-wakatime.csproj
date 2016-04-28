@@ -65,41 +65,28 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\visualstudio-wakatime\Downloader.cs">
-      <Link>visualstudio-wakatime\Downloader.cs</Link>
+    <Compile Include="Downloader.cs" />
+    <Compile Include="ProcessRunner.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="..\visualstudio-wakatime\NativeMethods.cs">
-      <Link>visualstudio-wakatime\NativeMethods.cs</Link>
-    </Compile>
-    <Compile Include="..\visualstudio-wakatime\ProcessorArchitectureHelper.cs">
-      <Link>visualstudio-wakatime\ProcessorArchitectureHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\visualstudio-wakatime\PythonCliParameters.cs">
-      <Link>visualstudio-wakatime\PythonCliParameters.cs</Link>
-    </Compile>
-    <Compile Include="..\visualstudio-wakatime\PythonManager.cs">
-      <Link>visualstudio-wakatime\PythonManager.cs</Link>
-    </Compile>
-    <Compile Include="..\visualstudio-wakatime\RunProcess.cs">
-      <Link>visualstudio-wakatime\RunProcess.cs</Link>
-    </Compile>
-    <Compile Include="..\visualstudio-wakatime\WakaTimeConfigFile.cs">
-      <Link>visualstudio-wakatime\WakaTimeConfigFile.cs</Link>
-    </Compile>
+    <Compile Include="PythonManager.cs" />
+    <Compile Include="WakaTimeCli.cs" />
     <Compile Include="WakaTimeConstants.cs" />
-    <Compile Include="WakaTimePackage.cs" />
-    <None Include="..\visualstudio-wakatime\WakaTimePackage.cs">
-      <Link>visualstudio-wakatime\WakaTimePackage.cs</Link>
-    </None>
-    <Compile Include="Logger.cs" />
     <Compile Include="Settings\SettingsView.xaml.cs">
       <DependentUpon>SettingsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Settings\SettingsViewModel.cs" />
-    <Compile Include="visualstudio-wakatime\WakaTimeCli.cs" />
     <Compile Include="Wakatime.cs" />
     <Compile Include="WakatimeAddin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Include="app.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <COMReference Include="Office">

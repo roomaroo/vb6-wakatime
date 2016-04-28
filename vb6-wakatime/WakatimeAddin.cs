@@ -26,16 +26,14 @@ namespace vb6_wakatime
         private string currentFileContents;
 
         private readonly Wakatime wakatime;
-        private readonly WakaTimeConfigFile configFile;
 
-        public WakatimeAddin() : this(new Wakatime(), new WakaTimeConfigFile())
+        public WakatimeAddin() : this(new Wakatime(new PythonManager(), new WakaTimeCli(new PythonManager())))
         {
         }
 
-        public WakatimeAddin(Wakatime wakatime, WakaTimeConfigFile configFile)
+        internal WakatimeAddin(Wakatime wakatime)
         {
             this.wakatime = wakatime;
-            this.configFile = configFile;
         }
 
         public void OnConnection(object vbInstance, vbext_ConnectMode ConnectMode, AddIn addinInstance, ref Array custom)
@@ -103,11 +101,9 @@ namespace vb6_wakatime
 
         private void PromptForMissingSettings()
         {
-            this.configFile.Read();
-
-            if (string.IsNullOrEmpty(this.configFile.ApiKey))
+            if (Properties.Settings.Default.ApiKey == Guid.Empty)
             {
-                var settingsWindow = new SettingsView(new SettingsViewModel(this.configFile));
+                var settingsWindow = new SettingsView();
                 settingsWindow.ShowDialog();
             }
         }
