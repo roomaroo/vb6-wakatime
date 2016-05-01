@@ -9,9 +9,9 @@ namespace vb6_wakatime
     using System.Runtime.InteropServices;
     using System.Threading.Tasks;
     using System.Windows;
+    using log4net;
     using Settings;
     using VBIDE;
-    using WakaTime;
 
     [ComVisible(true)]
     [Guid("8AEAE01D-49CD-429A-B71C-1818821A051A")]
@@ -22,23 +22,27 @@ namespace vb6_wakatime
         private VBProjectsEvents projectEvents;
         private FileControlEvents fileEvents;
         private VBComponentsEvents componentEvents;
+        private CommandBarEvents commandBarEvents;
         private IDisposable observableTimer;
         private string currentFileContents;
 
         private readonly Wakatime wakatime;
+        private readonly ILog log = LogManager.GetLogger(nameof(WakatimeAddin));
+        private readonly Reporter reporter;
 
-        public WakatimeAddin() : this(new Wakatime(new PythonManager(), new WakaTimeCli(new PythonManager())))
+        public WakatimeAddin() : this(new Wakatime(new PythonManager(), new WakaTimeCli(new PythonManager())), new Reporter(new PythonManager()))
         {
         }
 
-        internal WakatimeAddin(Wakatime wakatime)
+        internal WakatimeAddin(Wakatime wakatime, Reporter reporter)
         {
             this.wakatime = wakatime;
+            this.reporter = reporter;
         }
 
         public void OnConnection(object vbInstance, vbext_ConnectMode ConnectMode, AddIn addinInstance, ref Array custom)
         {
-            Debug.WriteLine("OnConnection");
+            log.Debug("Addin: OnConnection");
 
             var instance = vbInstance as VBE;
             if (instance == null)
@@ -48,11 +52,13 @@ namespace vb6_wakatime
 
             this.vbInstance = instance;
             this.HookupEvents();
+
+           
         }
 
         public void OnDisconnection(vbext_DisconnectMode RemoveMode, ref Array custom)
         {
-            Debug.WriteLine("OnDisconnection");
+            log.Debug("Addin: OnDisconnection");
 
             // Unhook events
             if (this.fileEvents != null)
@@ -89,10 +95,12 @@ namespace vb6_wakatime
             }
             catch (WebException we)
             {
+                log.Error("Error downloading dependencies", we);
                 this.ShowError("Could not download dependencies. Please ensure you have an internet connection and your proxy details are entered correctly");
             }
             catch (Exception ex)
             {
+                log.Error("Unexpected exception", ex);
                 this.ShowError($"Unexpected exception: {ex.Message} ({ex.GetType().Name})");
             }
 
@@ -103,9 +111,14 @@ namespace vb6_wakatime
         {
             if (Properties.Settings.Default.ApiKey == Guid.Empty)
             {
-                var settingsWindow = new SettingsView();
-                settingsWindow.ShowDialog();
+                this.ShowSettings();
             }
+        }
+
+        private void ShowSettings()
+        {
+            var settingsWindow = new SettingsView();
+            settingsWindow.ShowDialog();
         }
 
         private void ShowError(string message)
@@ -131,26 +144,20 @@ namespace vb6_wakatime
         private void FileSelected(VBComponent component)
         {
             string name = string.IsNullOrEmpty(component.FileNames[1]) ? component.Name : component.FileNames[1];
-            this.ReportFileEvent(name);
+            this.ReportFileEvent(component);
             this.MonitorFile(component);
         }
 
-        private void ReportFileEvent(VBComponent component)
+        private void ReportFileEvent(VBComponent component, bool isSave = false)
         {
-            var name = string.IsNullOrEmpty(component.FileNames[1]) ? component.Name : component.FileNames[1];
-            this.ReportFileEvent(name, false);
+            string projectName = component.VBE.ActiveVBProject.Name;
+            var fileName = string.IsNullOrEmpty(component.FileNames[1]) ? component.Name : component.FileNames[1];
+            this.ReportFileEvent(projectName, fileName, isSave);
         }
 
-        private void ReportFileEvent(string fileName, bool isSave = false)
+        private void ReportFileEvent(string project, string fileName, bool isSave = false)
         {
-            if (isSave)
-            {
-                Debug.WriteLine($"{DateTime.Now.ToString()} - File {fileName} saved");
-            }
-            else
-            {
-                Debug.WriteLine($"{DateTime.Now.ToString()} - File {fileName} selected");
-            }
+            this.reporter.SendHeartbeat(project, fileName, isSave).Start();
         }
 
         private void MonitorProject(VBProject project)
@@ -172,22 +179,17 @@ namespace vb6_wakatime
 
             this.componentEvents.ItemSelected += FileSelected;
             this.fileEvents.RequestWriteFile += FileSaved;
-            
+
             if (this.vbInstance.SelectedVBComponent != null)
             {
                 this.FileSelected(this.vbInstance.SelectedVBComponent);
             }
         }
 
-        private void ReportEvent([CallerMemberName]string eventHandler = null)
-        {
-            Debug.WriteLine($"{DateTime.Now.ToString()} - Event raised: {eventHandler}");
-        }
-
         private void FileSaved(VBProject project, string fileName, out bool cancel)
         {
             cancel = false;
-            ReportEvent();
+            this.ReportFileEvent(project.Name, fileName, true);
         }
 
         private void MonitorFile(VBComponent component)
@@ -209,5 +211,27 @@ namespace vb6_wakatime
                                     });
         }
 
+        private void AddMenuItem()
+        {
+            var addinMenu = this.vbInstance.CommandBars["Add-ins"];
+            if (addinMenu == null)
+            {
+                log.Error("Failed to get Add-ins menu");
+            }
+
+            var menuItem = addinMenu.Controls.Add(1);
+            menuItem.Caption = "Wakatime";
+
+            this.commandBarEvents = this.vbInstance.Events.CommandBarEvents[menuItem];
+            commandBarEvents.Click += MenuClicked;
+        }
+
+        private void MenuClicked(object CommandBarControl, ref bool handled, ref bool CancelDefault)
+        {
+            handled = true;
+            CancelDefault = true;
+            this.ShowSettings();
+        }
     }
 }
+ 

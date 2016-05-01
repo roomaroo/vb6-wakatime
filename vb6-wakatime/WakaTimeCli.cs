@@ -24,7 +24,7 @@
 
         internal async Task<bool> IsCliLatestVersion()
         {
-            var results = await ProcessRunner.RunProcessAsync(await this.pythonManager.GetPython(), WakaTimeConstants.CliPath, "--version");
+            var results = await ProcessRunner.RunProcessAsync(await this.pythonManager.GetPythonAsync(), WakaTimeConstants.CliPath, "--version");
 
             if (results.Success)
             {

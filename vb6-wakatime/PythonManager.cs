@@ -15,10 +15,10 @@ namespace vb6_wakatime
 
         internal bool IsPythonInstalled()
         {
-            return GetPython() != null;
+            return GetPythonAsync() != null;
         }
 
-        internal async Task<string> GetPython()
+        internal async Task<string> GetPythonAsync()
         {
             if (PythonBinaryLocation == null)
                 PythonBinaryLocation = await GetEmbeddedPath();

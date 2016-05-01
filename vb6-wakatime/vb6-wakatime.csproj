@@ -73,6 +73,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="PythonManager.cs" />
+    <Compile Include="Reporter.cs" />
     <Compile Include="WakaTimeCli.cs" />
     <Compile Include="WakaTimeConstants.cs" />
     <Compile Include="Settings\SettingsView.xaml.cs">

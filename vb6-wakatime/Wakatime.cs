@@ -2,7 +2,6 @@
 using System.Net;
 using System.Threading.Tasks;
 using log4net;
-using WakaTime;
 
 namespace vb6_wakatime
 {
