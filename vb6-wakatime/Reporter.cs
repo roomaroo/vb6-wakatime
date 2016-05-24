@@ -42,7 +42,7 @@
         {
             var parameters = new PythonCliParameters
             {
-                Key = Properties.Settings.Default.ApiKey,
+                Key = Guid.Parse(Properties.Settings.Default.ApiKey),
                 File = fileName,
                 Plugin = WakaTimeConstants.PluginName,
                 IsSave = isSave,

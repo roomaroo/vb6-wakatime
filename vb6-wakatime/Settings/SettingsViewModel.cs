@@ -6,18 +6,24 @@
 
     internal class SettingsViewModel : INotifyPropertyChanged
     {
-        internal Guid ApiKey
+        public Guid ApiKey
         {
             get
             {
-                return Properties.Settings.Default.ApiKey;
+                Guid guid;
+                if (Guid.TryParse(Properties.Settings.Default.ApiKey, out guid))
+                {
+                    return guid;
+                }
+
+                return Guid.Empty;
             }
 
             set
             {
-                if (Properties.Settings.Default.ApiKey != value)
+                if (Properties.Settings.Default.ApiKey != value.ToString())
                 {
-                    Properties.Settings.Default.ApiKey = value;
+                    Properties.Settings.Default.ApiKey = value.ToString();
                     this.NotifyPropertyChanged();
                 }
             }

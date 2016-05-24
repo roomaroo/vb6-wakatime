@@ -2,7 +2,7 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="vb6_wakatime.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="ApiKey" Type="System.Guid" Scope="User">
+    <Setting Name="ApiKey" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="Proxy" Type="System.String" Scope="User">

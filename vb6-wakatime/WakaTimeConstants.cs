@@ -7,10 +7,10 @@
     {
         internal const string PluginName = "vb6-wakatime";
         internal const string CliUrl = "https://github.com/wakatime/wakatime/archive/master.zip";
-        internal const string CliFolder = @"wakatime-master\wakatime\cli.py";
+        internal const string CliFolder = @"WakaTime\wakatime-master\wakatime\cli.py";
 
-        internal static string UserConfigDir => Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        internal static string InstallFolder => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "vb6-wakatime");
 
-        internal static string CliPath => Path.Combine(UserConfigDir, CliFolder);
+        internal static string CliPath => Path.Combine(InstallFolder, CliFolder);
     }
 }

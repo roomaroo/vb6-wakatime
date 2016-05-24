@@ -25,9 +25,10 @@ namespace vb6_wakatime.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Guid ApiKey {
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string ApiKey {
             get {
-                return ((global::System.Guid)(this["ApiKey"]));
+                return ((string)(this["ApiKey"]));
             }
             set {
                 this["ApiKey"] = value;

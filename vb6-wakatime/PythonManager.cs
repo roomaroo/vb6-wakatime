@@ -10,12 +10,13 @@ namespace vb6_wakatime
     class PythonManager
     {
         ILog log = LogManager.GetLogger(nameof(PythonManager));
-        private const string CurrentPythonVersion = "3.5.0";
+        private const string CurrentPythonVersion = "3.5.1";
         private string PythonBinaryLocation { get; set; }
 
-        internal bool IsPythonInstalled()
+        internal async Task<bool> IsPythonInstalledAsync()
         {
-            return GetPythonAsync() != null;
+            var result = await GetPythonAsync().ConfigureAwait(false);
+            return !string.IsNullOrEmpty(result);
         }
 
         internal async Task<string> GetPythonAsync()
@@ -123,7 +124,10 @@ namespace vb6_wakatime
 
                     if (!results.Success) continue;
                 }
-                catch { /*ignored*/ }
+                catch (Exception e)
+                {
+                    log.Error($"Error running python at {location}", e);
+                }
 
                 log.Debug(string.Format("Python found by Fixed Path: {0}", location));
 
@@ -135,9 +139,9 @@ namespace vb6_wakatime
 
         internal async Task<string> GetEmbeddedPath()
         {
-            var userConfigDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            var installFolder = WakaTimeConstants.InstallFolder;
 
-            var path = Path.Combine(userConfigDir, "python", "pythonw");
+            var path = Path.Combine(installFolder, "python", "pythonw.exe");
             try
             {
                 var results = await ProcessRunner.RunProcessAsync(path, "--version");

@@ -9,37 +9,44 @@ namespace vb6_wakatime
 
     class Downloader
     {
-        public async Task DownloadAndInstallWakaTimeAsync()
+        public Downloader()
         {
-            var userConfigDir = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
-            var zipFile = new FileInfo(Path.Combine(userConfigDir.FullName, "wakatime-cli.zip"));
-
-            await DownloadFileAsync(Properties.Settings.Default.CliUri, zipFile);
-            await UnpackFileAsync(zipFile, userConfigDir);
-            zipFile.Delete();
+            Directory.CreateDirectory(WakaTimeConstants.InstallFolder);
         }
 
+        public async Task DownloadAndInstallWakaTimeAsync()
+        {
+            var destinationFolder = Path.Combine(WakaTimeConstants.InstallFolder, "WakaTime");
+            var zipFile = Path.Combine(WakaTimeConstants.InstallFolder, "wakatime-cli.zip");
+
+            await DownloadFileAsync(Properties.Settings.Default.CliUri, zipFile);
+            await UnpackFileAsync(zipFile, destinationFolder);
+            File.Delete(zipFile);
+        }
 
         public async Task DownloadAndInstallPythonAsync()
         {
-            var userConfigDir = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
-            var zipFile = new FileInfo(Path.Combine(userConfigDir.FullName, "python.zip"));
-
+            var destinationFolder = Path.Combine(WakaTimeConstants.InstallFolder, "Python");
+            var zipFile = Path.Combine(WakaTimeConstants.InstallFolder, "python.zip");
+            
             var pythonUri = new Uri(PythonManager.PythonDownloadUrl);
             await DownloadFileAsync(pythonUri, zipFile);
-            await UnpackFileAsync(zipFile, userConfigDir);
-            zipFile.Delete();
+            await UnpackFileAsync(zipFile, destinationFolder);
+            File.Delete(zipFile);
         }
 
-        private async Task DownloadFileAsync(Uri uri, FileInfo localPath)
+        private async Task DownloadFileAsync(Uri uri, string localPath)
         {
-            var client = new WebClient { Proxy = new WebProxy(Properties.Settings.Default.Proxy) };
-            await client.DownloadFileTaskAsync(uri, localPath.FullName);
+            var proxyUri = Properties.Settings.Default.Proxy;
+            var proxy = string.IsNullOrEmpty(proxyUri) ? null : new WebProxy(proxyUri);
+
+            var client = new WebClient { Proxy = proxy };
+            await client.DownloadFileTaskAsync(uri, localPath);
         }
 
-        private async Task UnpackFileAsync(FileInfo zipFile, DirectoryInfo destination)
+        private async Task UnpackFileAsync(string zipFile, string destinationFolder)
         {
-            await Task.Run(() => ZipFile.ExtractToDirectory(zipFile.FullName, destination.FullName));
+            await Task.Run(() => ZipFile.ExtractToDirectory(zipFile, destinationFolder));
         }
     }
 }

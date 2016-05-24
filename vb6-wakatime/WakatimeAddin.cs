@@ -51,6 +51,7 @@ namespace vb6_wakatime
             }
 
             this.vbInstance = instance;
+            this.AddMenuItem();
             this.HookupEvents();
 
            
@@ -84,10 +85,11 @@ namespace vb6_wakatime
         }
         public void OnStartupComplete(ref Array custom)
         {
-            this.GetDependenciesAndSettingsAsync().Start();
+            this.GetDependenciesAsync().Wait();
+            this.PromptForMissingSettings();
         }
 
-        private async Task GetDependenciesAndSettingsAsync()
+        private async Task GetDependenciesAsync()
         {
             try
             {
@@ -103,13 +105,14 @@ namespace vb6_wakatime
                 log.Error("Unexpected exception", ex);
                 this.ShowError($"Unexpected exception: {ex.Message} ({ex.GetType().Name})");
             }
-
-            this.PromptForMissingSettings();
         }
 
         private void PromptForMissingSettings()
         {
-            if (Properties.Settings.Default.ApiKey == Guid.Empty)
+            Guid temp;
+            string apiKey = Properties.Settings.Default.ApiKey;
+
+            if (string.IsNullOrEmpty(apiKey) || !Guid.TryParse(apiKey, out temp))
             {
                 this.ShowSettings();
             }
@@ -117,8 +120,15 @@ namespace vb6_wakatime
 
         private void ShowSettings()
         {
-            var settingsWindow = new SettingsView();
-            settingsWindow.ShowDialog();
+            try
+            {
+                var settingsWindow = new SettingsView();
+                settingsWindow.ShowDialog();
+            }
+            catch (Exception e)
+            {
+                log.Error("Error showing settings", e);
+            }
         }
 
         private void ShowError(string message)
@@ -148,16 +158,16 @@ namespace vb6_wakatime
             this.MonitorFile(component);
         }
 
-        private void ReportFileEvent(VBComponent component, bool isSave = false)
+        private async Task ReportFileEvent(VBComponent component, bool isSave = false)
         {
             string projectName = component.VBE.ActiveVBProject.Name;
             var fileName = string.IsNullOrEmpty(component.FileNames[1]) ? component.Name : component.FileNames[1];
-            this.ReportFileEvent(projectName, fileName, isSave);
+            await this.ReportFileEvent(projectName, fileName, isSave);
         }
 
-        private void ReportFileEvent(string project, string fileName, bool isSave = false)
+        private async Task ReportFileEvent(string project, string fileName, bool isSave = false)
         {
-            this.reporter.SendHeartbeat(project, fileName, isSave).Start();
+            await this.reporter.SendHeartbeat(project, $"\"{fileName}\"", isSave);
         }
 
         private void MonitorProject(VBProject project)

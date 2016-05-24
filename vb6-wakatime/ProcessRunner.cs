@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,13 +30,19 @@ namespace vb6_wakatime
     {
         public static async Task<ProcessResults> RunProcessAsync(string path, params string[] arguments)
         {
+            if (!File.Exists(path))
+            {
+                return new ProcessResults(-1, string.Empty, $"Path {path} does not exist");
+            }
+
             var psi = new ProcessStartInfo
             {
                 Arguments = string.Join(" ", arguments),
                 CreateNoWindow = true,
                 FileName = path,
                 RedirectStandardError = true,
-                RedirectStandardOutput = true
+                RedirectStandardOutput = true,
+                UseShellExecute = false
             };
 
             var process = new Process
@@ -55,6 +62,8 @@ namespace vb6_wakatime
             {
                 await Task.Run(() => {
                     process.Start();
+                    process.BeginOutputReadLine();
+                    process.BeginErrorReadLine();
                     process.WaitForExit();
                 });
             }

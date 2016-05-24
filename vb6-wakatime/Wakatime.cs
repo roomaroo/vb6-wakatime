@@ -17,19 +17,14 @@ namespace vb6_wakatime
             this.wakatimeCli = wakatimeCli;
         }
 
-        public Task DownloadDependenciesAsync()
-        {
-            return Task.Run(() => DownloadDependencies());
-        }
-
-        public async Task DownloadDependencies()
+        public async Task DownloadDependenciesAsync()
         {
             try
             {
                 var downloader = new Downloader();
 
                 // Make sure python is installed
-                if (!this.pythonManager.IsPythonInstalled())
+                if (await this.pythonManager.IsPythonInstalledAsync() == false)
                 {
                     await downloader.DownloadAndInstallPythonAsync();
                 }

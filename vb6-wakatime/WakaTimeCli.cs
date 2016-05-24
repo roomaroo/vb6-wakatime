@@ -32,7 +32,7 @@
                 log.Info($"Current wakatime-cli version is {currentVersion}");
 
                 log.Info("Checking for updates to wakatime-cli...");
-                var latestVersion = this.LatestWakaTimeCliVersion();
+                var latestVersion = await this.LatestWakaTimeCliVersionAsync();
 
                 if (currentVersion.Equals(latestVersion))
                 {
@@ -46,11 +46,15 @@
             return false;
         }
 
-        internal async Task<string> LatestWakaTimeCliVersion()
+        internal async Task<string> LatestWakaTimeCliVersionAsync()
         {
             var regex = new Regex(@"(__version_info__ = )(\(( ?\'[0-9]+\'\,?){3}\))");
 
-            var client = new WebClient { Proxy = new WebProxy(Properties.Settings.Default.Proxy) };
+            var proxy = string.IsNullOrEmpty(Properties.Settings.Default.Proxy) ?
+                                null :
+                                new WebProxy(Properties.Settings.Default.Proxy);
+
+            var client = new WebClient { Proxy = proxy };
 
             try
             {
